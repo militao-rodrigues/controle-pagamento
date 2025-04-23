@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Pagamento - R$30.000</title>
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <h2>Controle de Pagamento - Total: R$30.000,00</h2>
+  <p><strong>Saldo Restante:</strong> <span id="saldo">R$ 28.000,00</span></p>
+  <p><strong>Total Pago:</strong> <span id="pago">R$ 2.000,00</span></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nº</th>
+        <th>Mês/Ano</th>
+        <th>Valor</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="tabela-parcelas"></tbody>
+  </table>
+
+  <script>
+    const parcelas = [
+      { mesAno: "jul/2023", valor: 500, pago: true },
+      { mesAno: "ago/2023", valor: 1500, pago: true }
+    ];
+
+    const parcelasFuturas = 28;
+    const valorParcela = 500;
+
+    for (let i = 0; i < parcelasFuturas; i++) {
+      const dataBase = new Date(2023, 8); // setembro 2023 é mês 8 (0-based)
+      const data = new Date(dataBase.setMonth(dataBase.getMonth() + i));
+      const mesAno = data.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
+      parcelas.push({ mesAno, valor: valorParcela, pago: false });
+    }
+
+    const tabela = document.getElementById("tabela-parcelas");
+    const saldoDisplay = document.getElementById("saldo");
+    const pagoDisplay = document.getElementById("pago");
+    const valorTotal = parcelas.reduce((soma, p) => soma + p.valor, 0);
+
+    function atualizarTotais() {
+      let totalPago = 0;
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach((box, i) => {
+        if (box.checked) {
+          totalPago += parcelas[i].valor;
+        }
+      });
+      const saldo = valorTotal - totalPago;
+      pagoDisplay.textContent = `R$ ${totalPago.toLocaleString('pt-BR')},00`;
+      saldoDisplay.textContent = `R$ ${saldo.toLocaleString('pt-BR')},00`;
+    }
+
+    parcelas.forEach((p, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${p.mesAno}</td>
+        <td>R$ ${p.valor},00</td>
+        <td><input type="checkbox" onchange="atualizarTotais()" ${p.pago ? 'checked' : ''}></td>
+      `;
+      tabela.appendChild(tr);
+    });
+
+    atualizarTotais();
+  </script>
+</body>
+</html>
