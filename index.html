@@ -81,5 +81,16 @@
 
     atualizarTotais();
   </script>
+   <script>
+        // Função para exibir a orientação em um alert
+        document.getElementById("helpButton").onclick = function() {
+            alert(
+                "Como usar o Controle de Pagamentos:\n\n" +
+                "1. Marque os checkboxes nas colunas para indicar que as parcelas foram pagas.\n" +
+                "2. O saldo restante será atualizado automaticamente conforme você for marcando os pagamentos.\n" +
+                "3. A tabela mostrará o total pago e o saldo devedor conforme você avançar no pagamento."
+            );
+        };
+    </script>
 </body>
 </html>
