@@ -2,28 +2,23 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Controle de Pagamento - R$30.000</title>
-  <link rel="manifest" href="manifest.json">
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js');
-    }
-  </script>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
+    body { font-family: sans-serif; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
     th { background-color: #f2f2f2; }
   </style>
 </head>
 <body>
-  <script>alert(
+  <script>
+    alert(
                 "Como usar o Controle de Pagamentos:\n\n" +
                 "1. Marque os checkboxes nas colunas para indicar que as parcelas foram pagas.\n" +
                 "2. O saldo restante será atualizado automaticamente conforme você for marcando os pagamentos.\n" +
                 "3. A tabela mostrará o total pago e o saldo devedor conforme você avançar no pagamento."
-            );</script> 
+            );
+  </script>
   <h2>Controle de Pagamento - Total: R$30.000,00</h2>
   <p><strong>Saldo Restante:</strong> <span id="saldo">R$ 28.000,00</span></p>
   <p><strong>Total Pago:</strong> <span id="pago">R$ 2.000,00</span></p>
@@ -46,11 +41,11 @@
       { mesAno: "ago/2023", valor: 1500, pago: true }
     ];
 
-    const parcelasFuturas = 28;
+    const parcelasFuturas = 56;
     const valorParcela = 500;
 
     for (let i = 0; i < parcelasFuturas; i++) {
-      const dataBase = new Date(2023, 8); // setembro 2023 é mês 8 (0-based)
+      const dataBase = new Date(2023, 8); // setembro 2023
       const data = new Date(dataBase.setMonth(dataBase.getMonth() + i));
       const mesAno = data.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
       parcelas.push({ mesAno, valor: valorParcela, pago: false });
@@ -87,7 +82,8 @@
 
     atualizarTotais();
   </script>
-   <!-- Botão para abrir a orientação -->
+  <br>
+  <!-- Botão para abrir a orientação -->
     <button class="help-button" id="helpButton">Ajuda</button>
 
     <script>
