@@ -1,101 +1,181 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Controle de Pagamento - R$30.000</title>
-  <style>
-    body { font-family: sans-serif; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #f2f2f2; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Pagamento</title>
+
+<style>
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f5f5f5;
+}
+
+/* ===== HEADER FIXO ===== */
+.resumo {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: white;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+/* Espaço para compensar header fixo */
+.container {
+    margin-top: 160px;
+    padding: 20px;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 768px) {
+    h2 {
+        font-size: 18px;
+    }
+    table {
+        font-size: 14px;
+    }
+}
+
+/* ===== TABELA ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Hover na linha */
+tr:hover {
+    background: #f0f0f0;
+}
+
+/* Quando checkbox estiver marcado */
+tr.checked {
+    background: #FFFACD;
+}
+
+/* Botão */
+button {
+    padding: 8px 15px;
+    cursor: pointer;
+    border: none;
+    background: #333;
+    color: white;
+    border-radius: 5px;
+}
+
+button:hover {
+    background: #555;
+}
+
+</style>
 </head>
+
 <body>
-  <script>
-    alert(
-                "Como usar o Controle de Pagamentos:\n\n" +
-                "1. Marque os checkboxes nas colunas para indicar que as parcelas foram pagas.\n" +
-                "2. O saldo restante será atualizado automaticamente conforme você for marcando os pagamentos.\n" +
-                "3. A tabela mostrará o total pago e o saldo devedor conforme você avançar no pagamento."
-            );
-  </script>
-  <h2>Controle de Pagamento - Total: R$30.000,00</h2>
-  <p><strong>Saldo Restante:</strong> <span id="saldo">R$ 28.000,00</span></p>
-  <p><strong>Total Pago:</strong> <span id="pago">R$ 2.000,00</span></p>
 
-  <table>
+<div class="resumo">
+    <h2>Controle de Pagamento - Total: R$30.000,00</h2>
+    <p><strong>Saldo Restante:</strong> <span id="saldo">R$ 28.000,00</span></p>
+    <p><strong>Total Pago:</strong> <span id="pago">R$ 2.000,00</span></p>
+
+    <button onclick="selectAll()">Select All</button>
+</div>
+
+<div class="container">
+
+<table>
     <thead>
-      <tr>
-        <th>Nº</th>
-        <th>Mês/Ano</th>
-        <th>Valor</th>
-        <th>Status</th>
-      </tr>
+        <tr>
+            <th>Mês</th>
+            <th>Valor</th>
+            <th>Pagar</th>
+        </tr>
     </thead>
-    <tbody id="tabela-parcelas"></tbody>
-  </table>
+    <tbody id="tabelaPagamentos">
 
-  <script>
-    const parcelas = [
-      { mesAno: "jul/2023", valor: 500, pago: true },
-      { mesAno: "ago/2023", valor: 1500, pago: true }
-    ];
+        <tr>
+            <td>Janeiro</td>
+            <td class="valor">2000</td>
+            <td><input type="checkbox" onchange="atualizar(this)"></td>
+        </tr>
 
-    const parcelasFuturas = 56;
-    const valorParcela = 500;
+        <tr>
+            <td>Fevereiro</td>
+            <td class="valor">2000</td>
+            <td><input type="checkbox" onchange="atualizar(this)"></td>
+        </tr>
 
-    for (let i = 0; i < parcelasFuturas; i++) {
-      const dataBase = new Date(2023, 8); // setembro 2023
-      const data = new Date(dataBase.setMonth(dataBase.getMonth() + i));
-      const mesAno = data.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
-      parcelas.push({ mesAno, valor: valorParcela, pago: false });
+        <tr>
+            <td>Março</td>
+            <td class="valor">2000</td>
+            <td><input type="checkbox" onchange="atualizar(this)"></td>
+        </tr>
+
+    </tbody>
+</table>
+
+</div>
+
+<script>
+
+let total = 30000;
+
+function atualizar(checkbox) {
+
+    const row = checkbox.closest("tr");
+    const valor = parseFloat(row.querySelector(".valor").innerText);
+
+    let pagoAtual = parseFloat(
+        document.getElementById("pago").innerText
+        .replace("R$","")
+        .replace(".","")
+        .replace(",","")
+    ) / 100;
+
+    if (checkbox.checked) {
+        row.classList.add("checked");
+        pagoAtual += valor;
+    } else {
+        row.classList.remove("checked");
+        pagoAtual -= valor;
     }
 
-    const tabela = document.getElementById("tabela-parcelas");
-    const saldoDisplay = document.getElementById("saldo");
-    const pagoDisplay = document.getElementById("pago");
-    const valorTotal = parcelas.reduce((soma, p) => soma + p.valor, 0);
+    atualizarValores(pagoAtual);
+}
 
-    function atualizarTotais() {
-      let totalPago = 0;
-      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-      checkboxes.forEach((box, i) => {
-        if (box.checked) {
-          totalPago += parcelas[i].valor;
-        }
-      });
-      const saldo = valorTotal - totalPago;
-      pagoDisplay.textContent = `R$ ${totalPago.toLocaleString('pt-BR')},00`;
-      saldoDisplay.textContent = `R$ ${saldo.toLocaleString('pt-BR')},00`;
-    }
+function selectAll() {
 
-    parcelas.forEach((p, i) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td>${p.mesAno}</td>
-        <td>R$ ${p.valor},00</td>
-        <td><input type="checkbox" onchange="atualizarTotais()" ${p.pago ? 'checked' : ''}></td>
-      `;
-      tabela.appendChild(tr);
+    const checkboxes = document.querySelectorAll("tbody input[type=checkbox]");
+    let todosMarcados = [...checkboxes].every(cb => cb.checked);
+
+    checkboxes.forEach(cb => {
+        cb.checked = !todosMarcados;
+        atualizar(cb);
     });
+}
 
-    atualizarTotais();
-  </script>
-  <br>
-  <!-- Botão para abrir a orientação -->
-    <button class="help-button" id="helpButton">Ajuda</button>
+function atualizarValores(pagoAtual) {
 
-    <script>
-        // Função para exibir a orientação em um alert
-        document.getElementById("helpButton").onclick = function() {
-            alert(
-                "Como usar o Controle de Pagamentos:\n\n" +
-                "1. Marque os checkboxes nas colunas para indicar que as parcelas foram pagas.\n" +
-                "2. O saldo restante será atualizado automaticamente conforme você for marcando os pagamentos.\n" +
-                "3. A tabela mostrará o total pago e o saldo devedor conforme você avançar no pagamento."
-            );
-        };
-    </script>
+    let saldo = total - pagoAtual;
+
+    document.getElementById("pago").innerText =
+        pagoAtual.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+
+    document.getElementById("saldo").innerText =
+        saldo.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+}
+
+</script>
+
 </body>
 </html>
