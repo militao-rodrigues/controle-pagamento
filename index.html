@@ -6,15 +6,12 @@
 <title>Controle de Pagamento</title>
 
 <style>
-
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
     background: #f5f5f5;
 }
 
-/* ===== HEADER FIXO ===== */
 .resumo {
     position: fixed;
     top: 0;
@@ -25,23 +22,16 @@ body {
     z-index: 1000;
 }
 
-/* Espaço para compensar header fixo */
 .container {
-    margin-top: 160px;
+    margin-top: 190px;
     padding: 20px;
 }
 
-/* ===== RESPONSIVO ===== */
 @media (max-width: 768px) {
-    h2 {
-        font-size: 18px;
-    }
-    table {
-        font-size: 14px;
-    }
+    h2 { font-size: 18px; }
+    table { font-size: 14px; }
 }
 
-/* ===== TABELA ===== */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -49,22 +39,18 @@ table {
 }
 
 th, td {
-    padding: 12px;
-    text-align: left;
+    padding: 10px;
     border-bottom: 1px solid #ddd;
 }
 
-/* Hover na linha */
 tr:hover {
     background: #f0f0f0;
 }
 
-/* Quando checkbox estiver marcado */
 tr.checked {
     background: #FFFACD;
 }
 
-/* Botão */
 button {
     padding: 8px 15px;
     cursor: pointer;
@@ -72,75 +58,83 @@ button {
     background: #333;
     color: white;
     border-radius: 5px;
+    margin-top: 10px;
 }
 
 button:hover {
     background: #555;
 }
-
 </style>
 </head>
 
 <body>
 
 <div class="resumo">
-    <h2>Controle de Pagamento - Total: R$30.000,00</h2>
+    <h2>Controle de Pagamento - Total: R$ 30.000,00</h2>
     <p><strong>Saldo Restante:</strong> <span id="saldo">R$ 28.000,00</span></p>
     <p><strong>Total Pago:</strong> <span id="pago">R$ 2.000,00</span></p>
-
     <button onclick="selectAll()">Select All</button>
 </div>
 
 <div class="container">
-
 <table>
-    <thead>
-        <tr>
-            <th>Mês</th>
-            <th>Valor</th>
-            <th>Pagar</th>
-        </tr>
-    </thead>
-    <tbody id="tabelaPagamentos">
-
-        <tr>
-            <td>Janeiro</td>
-            <td class="valor">2000</td>
-            <td><input type="checkbox" onchange="atualizar(this)"></td>
-        </tr>
-
-        <tr>
-            <td>Fevereiro</td>
-            <td class="valor">2000</td>
-            <td><input type="checkbox" onchange="atualizar(this)"></td>
-        </tr>
-
-        <tr>
-            <td>Março</td>
-            <td class="valor">2000</td>
-            <td><input type="checkbox" onchange="atualizar(this)"></td>
-        </tr>
-
-    </tbody>
+<thead>
+<tr>
+    <th>Competência</th>
+    <th>Valor</th>
+    <th>Pagar</th>
+</tr>
+</thead>
+<tbody id="tabelaPagamentos"></tbody>
 </table>
-
 </div>
 
 <script>
 
-let total = 30000;
+const totalContrato = 30000;
+let pagoAtual = 2000;
+
+const inicioAno = 2023;
+const inicioMes = 6; // Julho (0=Jan)
+
+let ano = inicioAno;
+let mes = inicioMes;
+
+const meses = [
+"Jan","Fev","Mar","Abr","Mai","Jun",
+"Jul","Ago","Set","Out","Nov","Dez"
+];
+
+const tabela = document.getElementById("tabelaPagamentos");
+
+for (let parcela = 1; parcela <= 58; parcela++) {
+
+    let valor = 500;
+    if (parcela === 2) valor = 1500;
+
+    let checked = parcela === 1 || parcela === 2 ? "checked" : "";
+
+    const linha = `
+        <tr class="${checked}">
+            <td>${meses[mes]}/${ano}</td>
+            <td class="valor">${valor}</td>
+            <td><input type="checkbox" onchange="atualizar(this)" ${checked}></td>
+        </tr>
+    `;
+
+    tabela.innerHTML += linha;
+
+    mes++;
+    if (mes > 11) {
+        mes = 0;
+        ano++;
+    }
+}
 
 function atualizar(checkbox) {
 
     const row = checkbox.closest("tr");
     const valor = parseFloat(row.querySelector(".valor").innerText);
-
-    let pagoAtual = parseFloat(
-        document.getElementById("pago").innerText
-        .replace("R$","")
-        .replace(".","")
-        .replace(",","")
-    ) / 100;
 
     if (checkbox.checked) {
         row.classList.add("checked");
@@ -150,7 +144,7 @@ function atualizar(checkbox) {
         pagoAtual -= valor;
     }
 
-    atualizarValores(pagoAtual);
+    atualizarValores();
 }
 
 function selectAll() {
@@ -158,15 +152,29 @@ function selectAll() {
     const checkboxes = document.querySelectorAll("tbody input[type=checkbox]");
     let todosMarcados = [...checkboxes].every(cb => cb.checked);
 
+    pagoAtual = 0;
+
     checkboxes.forEach(cb => {
+
         cb.checked = !todosMarcados;
-        atualizar(cb);
+
+        const row = cb.closest("tr");
+        const valor = parseFloat(row.querySelector(".valor").innerText);
+
+        if (!todosMarcados) {
+            row.classList.add("checked");
+            pagoAtual += valor;
+        } else {
+            row.classList.remove("checked");
+        }
     });
+
+    atualizarValores();
 }
 
-function atualizarValores(pagoAtual) {
+function atualizarValores() {
 
-    let saldo = total - pagoAtual;
+    let saldo = totalContrato - pagoAtual;
 
     document.getElementById("pago").innerText =
         pagoAtual.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
